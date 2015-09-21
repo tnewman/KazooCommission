@@ -1,5 +1,5 @@
-PyKazoo
-=======
+Kazoo Commission
+================
 
 .. image:: https://travis-ci.org/tnewman/KazooCommission.svg?branch=master
   :target: https://travis-ci.org/tnewman/KazooCommission
@@ -8,8 +8,7 @@ PyKazoo
 .. image:: https://readthedocs.org/projects/kazoocommission/badge/?version=latest
   :target: https://readthedocs.org/projects/kazoocommission/?badge=latest
 
-PyKazoo is a Python API client for `2600hz Kazoo`_. `2600hz Kazoo`_ is an excellent, scalable VoIP (Voice over IP)
-platform, which exclusively uses a JSON API for configuration. The goal of PyKazoo is to provide an easy way for Python
-developers to interface with this excellent software to start building great applications.
+Kazoo Commission provisions VoIP phones for the `2600hz Kazoo`_ platform through
+the Crossbar REST API.
 
 .. _`2600hz Kazoo`: https://2600hz.atlassian.net/wiki/display/docs/Overview
