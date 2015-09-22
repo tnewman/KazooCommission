@@ -27,7 +27,7 @@ setup(
     name='KazooCommission',
     version='0.0a4',
     packages=['kazoocommission'],
-    install_requires=['pykazoo>=0.0a4'],
+    install_requires=['flask>=0.10.1', 'pykazoo>=0.0a4'],
     tests_require=['pytest>=2.6.4', 'pytest-cov>=2.1.0', 'pytest-pep8>=1.0.6'],
     url='https://github.com/tnewman/PyKazoo',
     license='MIT',
