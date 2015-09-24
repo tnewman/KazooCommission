@@ -34,7 +34,7 @@ class TestKazooDeviceService(TestCase):
             {'data': [{'id': self.device_id}]}
 
         self.client.devices.get_device.return_value = \
-            {'device': 'data'}
+            {'data': 'value'}
 
         result = self.services.get_device_by_mac_address(
             self.account_id, self.mac)
@@ -45,17 +45,35 @@ class TestKazooDeviceService(TestCase):
         self.client.devices.get_device.assert_called_with(
             self.account_id, self.device_id)
 
-        assert result == {'device': 'data'}
+        assert result == 'value'
 
     def test_get_device_by_mac_address_returns_empty_for_invalid_mac(self):
         invalid_mac = 'notamac'
 
-        self.client.devices.get_devices.return_value = {'data': []}
+        self.client.devices.get_devices.return_value = \
+            {'data': []}
 
         result = self.services.get_device_by_mac_address(
             self.account_id, invalid_mac)
 
         self.client.devices.get_devices.assert_called_with(
             self.account_id, {'filter_mac_address': invalid_mac})
+
+        assert result is None
+
+    def test_get_device_by_mac_address_handles_ValueError(self):
+        self.client.devices.get_devices.return_value = \
+            {'data': [{'id': self.device_id}]}
+
+        self.client.devices.get_device.side_effect = ValueError()
+
+        result = self.services.get_device_by_mac_address(
+            self.account_id, self.mac)
+
+        self.client.devices.get_devices.assert_called_with(
+            self.account_id, {'filter_mac_address': self.mac})
+
+        self.client.devices.get_device.assert_called_with(
+            self.account_id, self.device_id)
 
         assert result is None

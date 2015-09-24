@@ -34,4 +34,7 @@ class KazooDeviceService:
         if len(devices) == 0:
             return None
         else:
-            return self.client.devices.get_device(account_id, devices[0]['id'])
+            device = self.client.devices.get_device(account_id,
+                                                    devices[0]['id'])
+
+            return device['data']
