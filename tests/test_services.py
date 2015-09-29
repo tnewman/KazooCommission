@@ -1,62 +1,99 @@
 import pykazoo.client
+import pykazoo.restrequest
 import kazoocommission.services
 from unittest import TestCase
 from unittest.mock import create_autospec
 
 
 def create_pykazoo_mock():
-    client = pykazoo.client.PyKazooClient('')
-    client.authentication = create_autospec(client.authentication)
-    client.devices = create_autospec(client.devices)
+    rest_request = create_autospec(pykazoo.restrequest.RestRequest)
+    client = pykazoo.client.PyKazooClient('', rest_request=rest_request)
 
     return client
 
 
-class TestKazooDeviceService(TestCase):
+class TestKazooAccountService(TestCase):
     def setUp(self):
         self.client = create_pykazoo_mock()
-        self.account_id = 'asdf3a3affa'
-        self.device_id = 'test_id'
-        self.mac = '57:fb:69:4a:f5:c5'
-        self.auth_token = 'asdfjkl;'
-        self.client.authentication.api_auth.return_value = self.auth_token
-
-        self.services = kazoocommission.services.KazooDeviceService(
+        self.service = kazoocommission.services.KazooAccountService(
             self.client)
 
     def test_pykazoo_client_used_by_default(self):
-        client = kazoocommission.services.KazooDeviceService()
+        client = kazoocommission.services.KazooAccountService().client
+        assert type(client) is pykazoo.client.PyKazooClient
 
-        assert type(client.client) is pykazoo.client.PyKazooClient
+    def test_get_account_by_name_returns_auth_token_account(self):
+        api_auth = {'auth_token': 'token', 'data':
+            {'account_id': '55555514def94f7ce08cf3e1a999999'}}
+        api_auth_account = \
+            {'data': {'account_id': '55555514def94f7ce08cf3e1a999999',
+                      'name': 'test'}}
+
+        self.client._rest_request.put.side_effect = [api_auth]
+        self.client._rest_request.get.side_effect = [api_auth_account]
+
+        account = self.service.get_account_by_name('test')
+
+        assert account == api_auth_account
+
+    def test_get_account_by_name_returns_child_account(self):
+        api_auth = \
+            {'data': {'account_id': '55555514def94f7ce08cf3e1a999999'},
+             'auth_token': 'wetawoij'}
+        api_account = {'data': {'name': 'incorrect'}}
+        accounts = {'data': [{'id': '55555514def94fasdfcf3e1a999999'}]}
+        child_account = \
+            {'data': {'id': '55555514def94fasdfcf3e1a999999'}}
+
+        self.client._rest_request.put.side_effect = [api_auth]
+        self.client._rest_request.get.side_effect = [api_account, accounts,
+                                                     child_account]
+
+        account = self.service.get_account_by_name('test')
+
+        assert account == child_account
+
+    def test_account_account_by_name_no_child_account_returns_none(self):
+        api_auth = \
+            {'data': {'account_id': '55555514def94f7ce08cf3e1a999999'},
+             'auth_token': 'wetawoij'}
+        api_account = {'data': {'name': 'incorrect'}}
+        accounts = {'data': []}
+        child_account = None
+
+        self.client._rest_request.put.side_effect = [api_auth]
+        self.client._rest_request.get.side_effect = [api_account, accounts,
+                                                     child_account]
+
+        account = self.service.get_account_by_name('test')
+
+        assert account == child_account
+
+class TestKazooDeviceService(TestCase):
+    def setUp(self):
+        self.client = create_pykazoo_mock()
+        self.service = kazoocommission.services.KazooDeviceService(
+            self.client)
+
+    def test_pykazoo_client_used_by_default(self):
+        client = kazoocommission.services.KazooAccountService().client
+        assert type(client) is pykazoo.client.PyKazooClient
 
     def test_get_device_by_mac_address_returns_device(self):
-        self.client.devices.get_devices.return_value = \
-            {'data': [{'id': self.device_id}]}
+        get_devices_return = {'data': [{'id': 'asdf', 'name': 'Test Phone'}]}
+        get_device_return = {'data': {'name': 'Test Phone'}}
 
-        self.client.devices.get_device.return_value = \
-            {'data': 'value'}
+        self.client._rest_request.get.side_effect = [get_devices_return,
+                                                     get_device_return]
 
-        result = self.services.get_device_by_mac_address(
-            self.account_id, self.mac)
+        device = self.service.get_device_by_mac_address('asdf',
+                                                         'fd:df:ef:cd:re')
 
-        self.client.devices.get_devices.assert_called_with(
-            self.account_id, {'filter_mac_address': self.mac})
-
-        self.client.devices.get_device.assert_called_with(
-            self.account_id, self.device_id)
-
-        assert result == 'value'
+        assert device == get_device_return['data']
 
     def test_get_device_by_mac_address_returns_empty_for_invalid_mac(self):
-        invalid_mac = 'notamac'
+        self.client._rest_request.get.return_value = {'data': []}
 
-        self.client.devices.get_devices.return_value = \
-            {'data': []}
+        device = self.service.get_device_by_mac_address('asdf', 'badmac')
 
-        result = self.services.get_device_by_mac_address(
-            self.account_id, invalid_mac)
-
-        self.client.devices.get_devices.assert_called_with(
-            self.account_id, {'filter_mac_address': invalid_mac})
-
-        assert result is None
+        assert device is None
