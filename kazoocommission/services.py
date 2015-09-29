@@ -31,7 +31,8 @@ class KazooAccountService(BaseKazooService):
         :rtype: dict
         """
 
-        account_id = self.client.authentication.api_auth(config.PYKAZOO_API_KEY)['data']['account_id']
+        account_id = self.client.authentication.api_auth(
+            config.PYKAZOO_API_KEY)['data']['account_id']
 
         account = self.client.accounts.get_account(account_id)
 

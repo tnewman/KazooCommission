@@ -24,7 +24,7 @@ class TestKazooAccountService(TestCase):
 
     def test_get_account_by_name_returns_auth_token_account(self):
         api_auth = {'auth_token': 'token', 'data':
-            {'account_id': '55555514def94f7ce08cf3e1a999999'}}
+                    {'account_id': '55555514def94f7ce08cf3e1a999999'}}
         api_auth_account = \
             {'data': {'account_id': '55555514def94f7ce08cf3e1a999999',
                       'name': 'test'}}
@@ -69,6 +69,7 @@ class TestKazooAccountService(TestCase):
 
         assert account == child_account
 
+
 class TestKazooDeviceService(TestCase):
     def setUp(self):
         self.client = create_pykazoo_mock()
@@ -87,7 +88,7 @@ class TestKazooDeviceService(TestCase):
                                                      get_device_return]
 
         device = self.service.get_device_by_mac_address('asdf',
-                                                         'fd:df:ef:cd:re')
+                                                        'fd:df:ef:cd:re')
 
         assert device == get_device_return['data']
 
