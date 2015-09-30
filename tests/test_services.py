@@ -55,7 +55,7 @@ class TestKazooAccountService(TestCase):
 
         account = self.service.get_account_by_name('test')
 
-        assert account == child_account
+        assert account == child_account['data']
 
     def test_account_account_by_name_no_child_account_returns_none(self):
         api_auth = \

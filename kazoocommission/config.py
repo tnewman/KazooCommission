@@ -6,13 +6,35 @@
    environmental variables.
 """
 
+from enum import Enum
 
-PYKAZOO_API_URL = 'http://192.168.91.128:8000/v2'
+
+class DNSMode(Enum):
+    a_record = 0
+    srv = 1
+    naptr_srv = 2
+    ip = 3
+
+# Settings for Kazoo Commission Server
+PYKAZOO_API_URL = 'http://localhost:8000/v2'
 """ The URL of the 2600hz Kazoo Crossbar API """
 
-PYKAZOO_API_KEY = '9d11546425bd3fc8fa5d8e9888aae828' + \
-                  'f4bbfb2da11e35a385f277dba59ced92'
+PYKAZOO_API_KEY = 'yourapikeyhere'
 """ The API Key to use for 2600hz Authentication """
 
-DEBUG = True
+DEBUG = False
 """ Enable Server Debug Mode """
+
+# Settings for Template Generation
+SIP_OUTBOUND_PROXY = 'localhost'
+
+SIP_DNS_MODE = DNSMode.a_record
+""" DNS Mode for SIP """
+
+AUTOPROVISION_SERVER_URL = 'http://localhost'
+""" URL to Provisioning Server (where Kazoo Commission is running). Don't
+    forget the port number and path! """
+
+FIRMWARE_SERVER_URL = 'http://localhost'
+""" URL of base directory firmware is served from (note: each template has
+    its own subdirectory for firmware) """

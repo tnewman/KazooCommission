@@ -1,4 +1,5 @@
-from flask import abort, Flask, request, Request, Response
+from flask import abort, Flask, make_response, render_template, request, \
+    Response
 from functools import wraps
 from kazoocommission import config
 from kazoocommission.services import KazooAccountService, KazooDeviceService
@@ -12,7 +13,7 @@ def authenticate(fn, account_service=None, device_service=None):
         nonlocal account_service
         nonlocal device_service
 
-        kwargs['mac_address'] = ':'.join(
+        mac_address_delimited = ':'.join(
             a+b for a, b in zip(kwargs['mac_address'][::2],
                                 kwargs['mac_address'][1::2])).lower()
 
@@ -29,7 +30,7 @@ def authenticate(fn, account_service=None, device_service=None):
                 abort(404)
 
             device = device_service.get_device_by_mac_address(
-                account['data']['id'], kwargs['mac_address'])
+                account['id'], mac_address_delimited)
 
             if not device:
                 abort(404)
@@ -39,21 +40,31 @@ def authenticate(fn, account_service=None, device_service=None):
         if request.authorization and \
            request.authorization.username == device['sip']['username'] and \
            request.authorization.password == device['sip']['password']:
+            kwargs['account_data'] = account
+            kwargs['device_data'] = device
+
             return fn(*args, **kwargs)
 
         else:
             return Response('Please supply proper device credentials.',
-                            401,
-                            {'WWW-Authenticate':
-                             'Basic realm="Login Required"'})
+                            401, {'WWW-Authenticate':
+                                  'Basic realm="Login Required"'})
 
     return decorated_view
 
 
-@app.route("/<account>/grandstream/<model>/cfg<mac_address>.xml")
+@app.route('/grandstream/<model>/<account>/cfg<mac_address>.xml')
 @authenticate
-def get_grandstream_provisioning_file(account, model, mac_address):
-    return "Hello World!"
+def get_grandstream_provisioning_file(model, account, mac_address,
+                                      account_data, device_data):
+    phone_config = render_template('ht502.xml', config=config,
+                                   account=account_data, device=device_data,
+                                   mac_address=mac_address)
 
-if __name__ == "__main__":
-    app.run(debug=config.DEBUG)
+    response = make_response(phone_config)
+    response.headers['Content-Type'] = 'application/xml'
+
+    return response
+
+if __name__ == '__main__':
+    app.run(debug=config.DEBUG, host='0.0.0.0')

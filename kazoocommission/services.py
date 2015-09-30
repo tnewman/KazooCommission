@@ -41,7 +41,7 @@ class KazooAccountService(BaseKazooService):
         account = self.client.accounts.get_account(account_id)
 
         if account['data']['name'] == account_name:
-            return account
+            return account['data']
 
         accounts = self.client.accounts.get_account_descendants(
             account_id, {'filter_name': account_name})
@@ -52,7 +52,7 @@ class KazooAccountService(BaseKazooService):
             account = self.client.accounts.get_account(
                 account_id, accounts['data'][0]['id'])
 
-            return account
+            return account['data']
 
 
 class KazooDeviceService(BaseKazooService):
