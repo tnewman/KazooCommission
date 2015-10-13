@@ -6,6 +6,7 @@ from unittest.mock import create_autospec, Mock
 
 app.test_request_context()
 
+
 class TestControllers(TestCase):
     def setUp(self):
         config.SSL_CLIENT_SUBJECT_VALIDATION = False
