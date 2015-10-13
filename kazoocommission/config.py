@@ -26,7 +26,8 @@ DEBUG = False
 
 SSL_CLIENT_SUBJECT_VALIDATION = True
 """ Whether or not the server will validate the MAC address of the requested
-    device against the the X-SSL-Subject. Highly recommended for security . """
+    device against the the X-SSL-Subject header passed from the web server. 
+    Highly recommended for security . """
 
 # Settings for Template Generation
 SIP_OUTBOUND_PROXY = 'preproduction.cita-communications.net'
