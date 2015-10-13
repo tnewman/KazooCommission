@@ -1,10 +1,15 @@
+import kazoocommission.config
+import kazoocommission.services
 from kazoocommission.controllers import *
 from unittest import TestCase
 from unittest.mock import create_autospec, Mock
 
+app.test_request_context()
 
 class TestControllers(TestCase):
     def setUp(self):
+        config.SSL_CLIENT_SUBJECT_VALIDATION = False
+
         self.mac_address = 'testmac'
         self.account = 'testaccount'
 
@@ -24,11 +29,13 @@ class TestControllers(TestCase):
                                          self.device_service)
 
     def test_authenticate_sets_account_and_device_data(self):
-
         self.authenticate(self.account_service, self.device_service,
-                          mac_address=self.mac_address, account=self.account)()
+                          mac_address=self.mac_address,
+                          account=self.account)()
 
         self.callback_fn.assert_called_with(
             self.account_service, self.device_service,
-            mac_address=self.mac_address, account_data=self.account_data[0],
-            device_data=self.device_data[0], account=self.account)
+            mac_address=self.mac_address,
+            account_data=self.account_data[0],
+            device_data=self.device_data[0],
+            account=self.account)

@@ -38,7 +38,7 @@ def authenticate(fn, account_service=None, device_service=None):
             abort(404)
 
         if config.SSL_CLIENT_SUBJECT_VALIDATION:
-            if request.headers['X-SSL-Subject'] != \
+            if request.headers.get('X-SSL-Subject') != \
                     kwargs['device_data']['mac_address']:
                 abort(403)
 
