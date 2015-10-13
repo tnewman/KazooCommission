@@ -1,10 +1,9 @@
-from flask import abort, Flask, make_response, render_template, request, \
-    Response
+from flask import abort, Flask, make_response, render_template, request
 from functools import wraps
 from kazoocommission import config
 from kazoocommission.services import KazooAccountService, KazooDeviceService
 
-app = Flask(__name__)
+app = Flask('kazoocomission')
 
 
 def authenticate(fn, account_service=None, device_service=None):
@@ -24,40 +23,38 @@ def authenticate(fn, account_service=None, device_service=None):
             device_service = KazooDeviceService()
 
         try:
-            account = account_service.get_account_by_name(kwargs['account'])
+            kwargs['account_data'] = account_service.get_account_by_name(
+                kwargs['account'])
 
-            if not account:
+            if not kwargs['account_data']:
                 abort(404)
 
-            device = device_service.get_device_by_mac_address(
-                account['id'], mac_address_delimited)
+            kwargs['device_data'] = device_service.get_device_by_mac_address(
+                kwargs['account_data']['id'], mac_address_delimited)
 
-            if not device:
+            if not kwargs['device_data']:
                 abort(404)
         except ValueError:
             abort(404)
 
-        if request.authorization and \
-           request.authorization.username == device['sip']['username'] and \
-           request.authorization.password == device['sip']['password']:
-            kwargs['account_data'] = account
-            kwargs['device_data'] = device
+        if config.SSL_CLIENT_SUBJECT_VALIDATION:
+            if request.headers['X-SSL-Subject'] != \
+                    kwargs['device_data']['mac_address']:
+                abort(403)
 
-            return fn(*args, **kwargs)
-
-        else:
-            return Response('Please supply proper device credentials.',
-                            401, {'WWW-Authenticate':
-                                  'Basic realm="Login Required"'})
+        return fn(*args, **kwargs)
 
     return decorated_view
 
 
-@app.route('/grandstream/<model>/<account>/cfg<mac_address>.xml')
+@app.route('/<manufacturer>/<model>/<account>/<mac_address>.xml')
 @authenticate
-def get_grandstream_provisioning_file(model, account, mac_address,
-                                      account_data, device_data):
-    phone_config = render_template('ht502.xml', config=config,
+def get_provisioning_file(manufacturer, model, account, mac_address,
+                          account_data, device_data):
+
+    template_path = manufacturer + '/' + model + '.xml'
+
+    phone_config = render_template(template_path, config=config,
                                    account=account_data, device=device_data,
                                    mac_address=mac_address)
 
@@ -65,6 +62,3 @@ def get_grandstream_provisioning_file(model, account, mac_address,
     response.headers['Content-Type'] = 'application/xml'
 
     return response
-
-if __name__ == '__main__':
-    app.run(debug=config.DEBUG, host='0.0.0.0')

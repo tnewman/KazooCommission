@@ -16,25 +16,25 @@ class DNSMode(Enum):
     ip = 3
 
 # Settings for Kazoo Commission Server
-PYKAZOO_API_URL = 'http://localhost:8000/v2'
-""" The URL of the 2600hz Kazoo Crossbar API """
+PYKAZOO_API_URL = 'http://192.168.1.239:8000/v2'
 
-PYKAZOO_API_KEY = 'yourapikeyhere'
-""" The API Key to use for 2600hz Authentication """
+PYKAZOO_API_KEY = '089879bd0dd6504081cf6b9601a2bc4e' + \
+                  '0cc4d9c5668d5f771c4d8a62f1e65ae8'
+""" The API Key to use for 2600hz Authentication. """
 
-DEBUG = False
+DEBUG = True
 """ Enable Server Debug Mode """
 
-# Settings for Template Generation
-SIP_OUTBOUND_PROXY = 'localhost'
+SSL_CLIENT_SUBJECT_VALIDATION = False
+""" Whether or not the server will validate the MAC address of the requested
+    device against the the X-SSL-Subject. Highly recommended for security . """
 
-SIP_DNS_MODE = DNSMode.a_record
+# Settings for Template Generation
+SIP_OUTBOUND_PROXY = 'preproduction.cita-communications.net'
+
+SIP_DNS_MODE = DNSMode.srv
 """ DNS Mode for SIP """
 
-AUTOPROVISION_SERVER_URL = 'http://localhost'
-""" URL to Provisioning Server (where Kazoo Commission is running). Don't
-    forget the port number and path! """
-
-FIRMWARE_SERVER_URL = 'http://localhost'
+FIRMWARE_SERVER_URL = 'http://192.168.1.190:5000'
 """ URL of base directory firmware is served from (note: each template has
     its own subdirectory for firmware) """

@@ -1,5 +1,4 @@
 import pykazoo.client
-import pykazoo.restrequest
 import kazoocommission.services
 from unittest import TestCase
 from unittest.mock import create_autospec
