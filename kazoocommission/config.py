@@ -16,16 +16,15 @@ class DNSMode(Enum):
     ip = 3
 
 # Settings for Kazoo Commission Server
-PYKAZOO_API_URL = 'http://192.168.1.239:8000/v2'
+PYKAZOO_API_URL = 'localhost'
 
-PYKAZOO_API_KEY = '089879bd0dd6504081cf6b9601a2bc4e' + \
-                  '0cc4d9c5668d5f771c4d8a62f1e65ae8'
+PYKAZOO_API_KEY = 'mykey'
 """ The API Key to use for 2600hz Authentication. """
 
-DEBUG = True
+DEBUG = False
 """ Enable Server Debug Mode """
 
-SSL_CLIENT_SUBJECT_VALIDATION = False
+SSL_CLIENT_SUBJECT_VALIDATION = True
 """ Whether or not the server will validate the MAC address of the requested
     device against the the X-SSL-Subject. Highly recommended for security . """
 
@@ -35,6 +34,6 @@ SIP_OUTBOUND_PROXY = 'preproduction.cita-communications.net'
 SIP_DNS_MODE = DNSMode.srv
 """ DNS Mode for SIP """
 
-FIRMWARE_SERVER_URL = 'http://192.168.1.190:5000'
+FIRMWARE_SERVER_URL = 'http://localhost'
 """ URL of base directory firmware is served from (note: each template has
     its own subdirectory for firmware) """
