@@ -94,3 +94,6 @@ class TestControllers(TestCase):
 
         self.assertRaises(NotFound, authenticate_fn,
                           mac_address=self.mac_address, account=self.account)
+
+    def test_get_provisioning_file(self):
+        pass
