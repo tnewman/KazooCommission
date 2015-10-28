@@ -1,3 +1,4 @@
+import kazoocommission
 from kazoocommission.controllers import *
 from unittest import TestCase
 from unittest.mock import create_autospec, Mock
@@ -23,17 +24,15 @@ class TestControllers(TestCase):
             self.device_data
 
         self.callback_fn = Mock()
-        self.authenticate = authenticate(self.callback_fn,
-                                         self.account_service,
-                                         self.device_service)
+        self.authenticate = authenticate(self.callback_fn)
 
     def test_authenticate_sets_account_and_device_data(self):
-        self.authenticate(self.account_service, self.device_service,
+        self.authenticate(account_service=self.account_service,
+                          device_service=self.device_service,
                           mac_address=self.mac_address,
                           account=self.account)()
 
         self.callback_fn.assert_called_with(
-            self.account_service, self.device_service,
             mac_address=self.mac_address,
             account_data=self.account_data[0],
             device_data=self.device_data[0],
@@ -42,19 +41,20 @@ class TestControllers(TestCase):
     def test_authenticate_non_existent_account_raises_404(self):
         self.account_service.get_account_by_name.side_effect = [None]
 
-        self.assertRaises(NotFound, self.authenticate, self.account_service,
-                          self.device_service, mac_address=self.mac_address,
+        self.assertRaises(NotFound, self.authenticate,
+                          account_service=self.account_service,
+                          device_service=self.device_service,
+                          mac_address=self.mac_address,
                           account=self.account)
 
     def test_authenticate_non_existent_device_raises_404(self):
         self.device_service.get_device_by_mac_address.side_effect = [None]
 
-        self.assertRaises(NotFound, self.authenticate, self.account_service,
-                          self.device_service, mac_address=self.mac_address,
+        self.assertRaises(NotFound, self.authenticate,
+                          account_service=self.account_service,
+                          device_service=self.device_service,
+                          mac_address=self.mac_address,
                           account=self.account)
-
-    def test_authenticate_client_certificate_mac_validation(self):
-        pass
 
     def test_authenticate_client_certificate(self):
         config.SSL_CLIENT_SUBJECT_VALIDATION = True
@@ -63,26 +63,23 @@ class TestControllers(TestCase):
             request.headers = EnvironHeaders({'X-SSL-Subject':
                                               self.mac_address})
 
-            self.authenticate(self.account_service, self.device_service,
+            self.assertRaises(Forbidden, self.authenticate,
+                              account_service=self.account_service,
+                              device_service=self.device_service,
                               mac_address=self.mac_address,
-                              account=self.account)()
-
-            self.callback_fn.assert_called_with(
-                self.account_service, self.device_service,
-                mac_address=self.mac_address,
-                account_data=self.account_data[0],
-                device_data=self.device_data[0],
-                account=self.account)
+                              account=self.account)
 
     def test_authenticate_client_certificate_incorrect_mac(self):
         config.SSL_CLIENT_SUBJECT_VALIDATION = True
 
         with app.test_request_context('/'):
-            request.headers = EnvironHeaders({})
+            request.headers = EnvironHeaders({'X-SSL-Subject': 'slkjfkldfjsa'})
 
             self.assertRaises(
-                Forbidden, self.authenticate, self.account_service,
-                self.device_service, mac_address=self.mac_address,
+                Forbidden, self.authenticate,
+                account_service=self.account_service,
+                device_service=self.device_service,
+                mac_address=self.mac_address,
                 account=self.account)
 
     def test_services_default_implementations(self):
@@ -96,4 +93,19 @@ class TestControllers(TestCase):
                           mac_address=self.mac_address, account=self.account)
 
     def test_get_provisioning_file(self):
-        pass
+        import os.path
+        import sys
+        sys.path.append(os.path.join(os.path.dirname(kazoocommission.__file__),
+                                     'templates'))
+
+        with app.app_context():
+            app.jinja_loader.searchpath.append(
+                os.path.join(os.path.dirname(kazoocommission.__file__),
+                             'templates'))
+
+            response = get_provisioning_file(
+                    'cisco', 'spa504g', account_service=self.account_service,
+                    device_service=self.device_service, account=self.account,
+                    mac_address=self.mac_address)
+
+            assert response.status == '200 OK'

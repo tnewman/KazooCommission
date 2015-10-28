@@ -3,14 +3,17 @@ from functools import wraps
 from kazoocommission import config
 from kazoocommission.services import KazooAccountService, KazooDeviceService
 
-app = Flask('kazoocomission')
+app = Flask(__name__)
 
 
-def authenticate(fn, account_service=None, device_service=None):
+def authenticate(fn):
     @wraps(fn)
     def decorated_view(*args, **kwargs):
-        nonlocal account_service
-        nonlocal device_service
+        account_service = kwargs.get('account_service')
+        device_service = kwargs.get('device_service')
+
+        kwargs.pop('account_service', None)
+        kwargs.pop('device_service', None)
 
         mac_address_delimited = ':'.join(
             a+b for a, b in zip(kwargs['mac_address'][::2],
@@ -38,8 +41,12 @@ def authenticate(fn, account_service=None, device_service=None):
             abort(404)
 
         if config.SSL_CLIENT_SUBJECT_VALIDATION:
-            if request.headers.environ.get('X-SSL-Subject') != \
-                    kwargs['mac_address']:
+            ssl_subject = request.headers.get('X-SSL-Subject')
+
+            if not ssl_subject:
+                abort(403)
+
+            if not kwargs['mac_address'] in ssl_subject:
                 abort(403)
 
         return fn(*args, **kwargs)
