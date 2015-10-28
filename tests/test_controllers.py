@@ -73,7 +73,7 @@ class TestControllers(TestCase):
         config.SSL_CLIENT_SUBJECT_VALIDATION = True
 
         with app.test_request_context('/'):
-            request.headers = EnvironHeaders({'X-SSL-Subject': 'slkjfkldfjsa'})
+            request.headers = {'X-SSL-Subject': 'slkjfkldfjsa'}
 
             self.assertRaises(
                 Forbidden, self.authenticate,
