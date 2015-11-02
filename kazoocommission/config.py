@@ -16,12 +16,12 @@ class DNSMode(Enum):
     ip = 3
 
 # Settings for Kazoo Commission Server
-PYKAZOO_API_URL = 'localhost'
+PYKAZOO_API_URL = 'https://preproduction.cita-communications.net:8443/v2'
 
-PYKAZOO_API_KEY = 'mykey'
+PYKAZOO_API_KEY = '49af69ef81e940733b86f488951a2d14fd8fa11d82530c15b4274724c1a8872e'
 """ The API Key to use for 2600hz Authentication. """
 
-DEBUG = False
+DEBUG = True
 """ Enable Server Debug Mode """
 
 SSL_CLIENT_SUBJECT_VALIDATION = True
@@ -32,8 +32,8 @@ SSL_CLIENT_SUBJECT_VALIDATION = True
 # Settings for Template Generation
 SIP_OUTBOUND_PROXY = 'preproduction.cita-communications.net'
 
-SIP_DNS_MODE = DNSMode.srv
-""" DNS Mode for SIP """
+SIP_DNS_SRV = True
+""" Use DNS SRV Mode """
 
 FIRMWARE_SERVER_URL = 'http://localhost'
 """ URL of base directory firmware is served from (note: each template has
