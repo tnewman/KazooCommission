@@ -16,9 +16,9 @@ class DNSMode(Enum):
     ip = 3
 
 # Settings for Kazoo Commission Server
-PYKAZOO_API_URL = 'https://preproduction.cita-communications.net:8443/v2'
+PYKAZOO_API_URL = 'https://localhost:8000/v2'
 
-PYKAZOO_API_KEY = '49af69ef81e940733b86f488951a2d14fd8fa11d82530c15b4274724c1a8872e'
+PYKAZOO_API_KEY = '1234asdf'
 """ The API Key to use for 2600hz Authentication. """
 
 DEBUG = True
