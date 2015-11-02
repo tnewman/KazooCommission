@@ -50,7 +50,7 @@ class KazooAccountService(BaseKazooService):
             return None
         else:
             account = self.client.accounts.get_account(
-                account_id, accounts['data'][0]['id'])
+                accounts['data'][0]['id'])
 
             return account['data']
 
