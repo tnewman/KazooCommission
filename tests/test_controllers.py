@@ -18,7 +18,8 @@ class TestControllers(TestCase):
         self.account_service.get_account_by_name.side_effect = \
             self.account_data
 
-        self.device_data = [{'mac_address': 'te:st:mac'}]
+        self.device_data = [{'mac_address': 'te:st:mac', 'sip':
+                            {'username': 'user', 'password': 'pass'}}]
         self.device_service = create_autospec(KazooDeviceService)
         self.device_service.get_device_by_mac_address.side_effect = \
             self.device_data
