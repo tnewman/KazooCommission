@@ -87,6 +87,21 @@ class KazooDeviceService(BaseKazooService):
             return None
         else:
             device = self.client.devices.get_device(account_id,
-                                                    devices[0]['id'])
+                                                    devices[0]['id'])['data']
 
-            return device['data']
+            device['line_display_text'] = self._get_line_display_text(device)
+
+            return device
+
+    @staticmethod
+    def _get_line_display_text(device_data):
+        if 'caller_id' in device_data:
+            caller_id = device_data['caller_id']
+
+            if 'internal' in caller_id:
+                internal = caller_id['internal']
+
+                if 'name' in internal and 'number' in internal:
+                    return internal['number'] + '-' + internal['name']
+
+        return device_data['name']

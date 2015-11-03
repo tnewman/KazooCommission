@@ -123,7 +123,10 @@ class TestKazooDeviceService(TestCase):
 
     def test_get_device_by_mac_address_returns_device(self):
         get_devices_return = {'data': [{'id': 'asdf', 'name': 'Test Phone'}]}
-        get_device_return = {'data': {'name': 'Test Phone'}}
+        get_device_return = \
+            {'data': {'name': 'Test Phone', 'caller_id':
+                      {'internal': {'name': 'cidname',
+                                    'number': 'cidnumber'}}}}
 
         self.client._rest_request.get.side_effect = [get_devices_return,
                                                      get_device_return]
@@ -150,7 +153,10 @@ class TestKazooDeviceService(TestCase):
              'auth_token': 'wetawoij'}
 
         devices_data = {'data': [{'id': 'asdf', 'name': 'Test Phone'}]}
-        device_data = {'data': {'name': 'Test Phone'}}
+        device_data = \
+            {'data': {'name': 'Test Phone', 'caller_id':
+                              {'internal': {'name': 'cidname',
+                                            'number': 'cidnumber'}}}}
 
         self.client._rest_request.put.side_effect = [api_auth]
         self.client._rest_request.get.side_effect = [devices_data, device_data]
@@ -159,3 +165,30 @@ class TestKazooDeviceService(TestCase):
             '55555514def94f7ce08cf3e1a999999', 'testmac')
 
         assert self.client.authentication.authenticated
+
+    def test_get_device_by_mac_address_sets_line_display_text(self):
+        get_devices_return = {'data': [{'id': 'asdf', 'name': 'Test Phone'}]}
+        get_device_return = \
+            {'data': {'name': 'Test Phone', 'caller_id':
+                      {'internal': {'name': 'cidname',
+                                    'number': 'cidnumber'}}}}
+
+        self.client._rest_request.get.side_effect = [get_devices_return,
+                                                     get_device_return]
+
+        device = self.service.get_device_by_mac_address('asdf',
+                                                        'fd:df:ef:cd:re')
+
+        assert device['line_display_text'] == 'cidnumber-cidname'
+
+    def test_get_device_by_mac_address_default_line_display_text(self):
+        get_devices_return = {'data': [{'id': 'asdf', 'name': 'Test Phone'}]}
+        get_device_return = {'data': {'name': 'Test Phone'}}
+
+        self.client._rest_request.get.side_effect = [get_devices_return,
+                                                     get_device_return]
+
+        device = self.service.get_device_by_mac_address('asdf',
+                                                        'fd:df:ef:cd:re')
+
+        assert device['line_display_text'] == 'Test Phone'

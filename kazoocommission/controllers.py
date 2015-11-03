@@ -25,19 +25,16 @@ def authenticate(fn):
         if device_service is None:
             device_service = KazooDeviceService()
 
-        try:
-            kwargs['account_data'] = account_service.get_account_by_name(
-                kwargs['account'])
+        kwargs['account_data'] = account_service.get_account_by_name(
+            kwargs['account'])
 
-            if not kwargs['account_data']:
-                abort(404)
+        if not kwargs['account_data']:
+            abort(404)
 
-            kwargs['device_data'] = device_service.get_device_by_mac_address(
-                kwargs['account_data']['id'], mac_address_delimited)
+        kwargs['device_data'] = device_service.get_device_by_mac_address(
+            kwargs['account_data']['id'], mac_address_delimited)
 
-            if not kwargs['device_data']:
-                abort(404)
-        except ValueError:
+        if not kwargs['device_data']:
             abort(404)
 
         if config.SSL_CLIENT_SUBJECT_VALIDATION:

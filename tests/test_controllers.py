@@ -2,6 +2,7 @@ import kazoocommission
 from kazoocommission.controllers import *
 from unittest import TestCase
 from unittest.mock import create_autospec, Mock
+from requests.exceptions import InvalidSchema
 from werkzeug.datastructures import EnvironHeaders
 from werkzeug.exceptions import Forbidden, NotFound
 
@@ -90,7 +91,7 @@ class TestControllers(TestCase):
 
         authenticate_fn = authenticate(self.callback_fn)
 
-        self.assertRaises(NotFound, authenticate_fn,
+        self.assertRaises(InvalidSchema, authenticate_fn,
                           mac_address=self.mac_address, account=self.account)
 
     def test_get_provisioning_file(self):
