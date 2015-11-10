@@ -1,75 +1,27 @@
 from kazoocommission import config
-import pykazoo.client
+import couchdb.client
 
 
-class BaseKazooService:
-    def __init__(self, client=None):
-        self.client = client
-
-        if self.client is None:
-            self.client = pykazoo.client.PyKazooClient(config.PYKAZOO_API_URL)
-
-
-class KazooAccountService(BaseKazooService):
-    """ Provides access to Kazoo platform Accounts.
-
-        :param client: The client to use to interact with the Kazoo Crossbar
-                       API. The default is pykazoo.
-        :type client: pykazoo.client.PyKazooClient
-    """
-
-    def __init__(self, client=None):
-        BaseKazooService.__init__(self, client)
-
-    def get_account_by_name(self, account_name):
-        """ Gets a specific account by name, searching both the account
-            associated with the API key in config.py and its descendants.
-
-        :param account_name: Account name to retrieve account for.
-        :return: Account
-        :type account_name: str
-        :rtype: dict
-        """
-
-        if self.client.authentication.authenticated and \
-                self.client.authentication.account_id:
-            account_id = self.client.authentication.account_id
-        else:
-            account_id = self.client.authentication.api_auth(
-                config.PYKAZOO_API_KEY)['data']['account_id']
-
-        account = self.client.accounts.get_account(account_id)
-
-        if account['data']['name'] == account_name:
-            return account['data']
-
-        accounts = self.client.accounts.get_account_descendants(
-            account_id, {'filter_name': account_name})
-
-        if len(accounts['data']) == 0:
-            return None
-        else:
-            account = self.client.accounts.get_account(
-                accounts['data'][0]['id'])
-
-            return account['data']
-
-
-class KazooDeviceService(BaseKazooService):
+class KazooDeviceService:
     """ Provides access to Kazoo platform Devices.
 
-        :param client: The client to use to interact with the Kazoo Crossbar
-                       API. The default is pykazoo.
-        :type client: pykazoo.client.PyKazooClient
+        :param couch_client: The CouchDB client to use to interact with the
+                             Kazoo CouchDB database. The default is
+                             couchdb-python.
+        :type couch_client: couchdb.client.Server
     """
 
-    def __init__(self, client=None):
-        BaseKazooService.__init__(self, client)
+    def __init__(self, couch_client=None):
+        self.couch_client = couch_client
 
-    def get_device_by_mac_address(self, account_id, mac_address):
+        if self.couch_client is None:
+            self.couch_client = couchdb.client.Server(
+                config.KAZOO_COUCH_DB_URL)
+
+    def get_device_by_mac_address(self, account_name, mac_address):
         """ Gets a specific device for an account by MAC address.
 
-        :param account_id: Account ID to retrieve a device from.
+        :param account_name: Account Name to retrieve a device from.
         :param mac_address: Device MAC address in lowercase, colon delimited
                format (57:fb:69:4a:f5:c5)
         :return: Device Configuration
@@ -77,21 +29,64 @@ class KazooDeviceService(BaseKazooService):
         :rtype: dict
         """
 
-        if not self.client.authentication.authenticated:
-            self.client.authentication.api_auth(config.PYKAZOO_API_KEY)
+        couch_account_id = self._get_couch_account_id_for_account_name(
+            account_name)
 
-        devices = self.client.devices.get_devices(
-            account_id, {'filter_mac_address': mac_address})['data']
-
-        if len(devices) == 0:
+        if couch_account_id is None:
             return None
-        else:
-            device = self.client.devices.get_device(account_id,
-                                                    devices[0]['id'])['data']
 
-            device['line_display_text'] = self._get_line_display_text(device)
+        device_data = self._retrieve_device(couch_account_id, mac_address)
 
-            return device
+        if not device_data:
+            return None
+
+        return device_data
+
+    def _get_couch_account_id_for_account_name(self, account_name):
+        try:
+            account_list = list(self.couch_client['accounts'].view(
+                'accounts/listing_by_name',
+                key=account_name))
+            account_id = account_list[0]['value']['account_id']
+        except IndexError:
+            return None
+
+        couch_account_id = self._get_kazoo_account_id_couch_db_format(
+            account_id)
+
+        return couch_account_id
+
+    @staticmethod
+    def _get_kazoo_account_id_couch_db_format(account_id):
+        part_one = account_id[0:2]
+        part_two = account_id[2:4]
+        part_three = account_id[4:]
+        couch_account_id = 'account' + '/' + part_one + '/' + \
+                           part_two + '/' + part_three
+
+        return couch_account_id
+
+    def _retrieve_device(self, account_id_couch, mac_address):
+        try:
+            device_id = list(self.couch_client[account_id_couch].view(
+                'devices/listing_by_macaddress', key=mac_address))[0]['id']
+            unfiltered_device_data = \
+                self.couch_client[account_id_couch][device_id]
+        except IndexError:
+            return None
+
+        device_data = self._remove_private_keys_from_device(
+            unfiltered_device_data)
+
+        device_data['line_display_text'] = self._get_line_display_text(
+            device_data)
+
+        return unfiltered_device_data
+
+    @staticmethod
+    def _remove_private_keys_from_device(unfiltered_device_data):
+        return {key: unfiltered_device_data[key] for key in
+                unfiltered_device_data.keys() if not key.startswith('pvt_')}
 
     @staticmethod
     def _get_line_display_text(device_data):

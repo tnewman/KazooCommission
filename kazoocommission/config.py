@@ -16,15 +16,13 @@ class DNSMode(Enum):
     ip = 3
 
 # Settings for Kazoo Commission Server
-PYKAZOO_API_URL = 'https://localhost:8000/v2'
-
-PYKAZOO_API_KEY = '1234asdf'
-""" The API Key to use for 2600hz Authentication. """
+KAZOO_COUCH_DB_URL = 'http://192.168.1.239:5984'
+""" URL to connect to CouchDB for 2600hz Kazoo """
 
 DEBUG = True
 """ Enable Server Debug Mode """
 
-SSL_CLIENT_SUBJECT_VALIDATION = True
+SSL_CLIENT_SUBJECT_VALIDATION = False
 """ Whether or not the server will validate the MAC address of the requested
     device against the the X-SSL-Subject header passed from the web server.
     Highly recommended for security. """
