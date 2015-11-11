@@ -1,5 +1,6 @@
 from flask import abort, Flask, make_response, render_template, request
 from functools import wraps
+from jinja2.exceptions import TemplateNotFound
 from kazoocommission import config
 from kazoocommission.services import KazooDeviceService
 
@@ -47,9 +48,12 @@ def get_provisioning_file(manufacturer, model, account, mac_address,
 
     template_path = manufacturer + '/' + model + '.xml'
 
-    phone_config = render_template(template_path, config=config,
-                                   account=account, device=device_data,
-                                   mac_address=mac_address)
+    try:
+        phone_config = render_template(template_path, config=config,
+                                       account=account, device=device_data,
+                                       mac_address=mac_address)
+    except TemplateNotFound:
+        abort(404)
 
     response = make_response(phone_config)
     response.headers['Content-Type'] = 'application/xml'
