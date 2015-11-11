@@ -17,8 +17,8 @@ KAZOO_COUCH_DB_URL = os.environ.get('KAZOO_COUCH_DB_URL',
 DEBUG = 'KAZOO_COMMISSION_DEBUG' in os.environ
 """ Enable Server Debug Mode """
 
-SSL_CLIENT_SUBJECT_VALIDATION = \
-    'KAZOO_COMMISSION_SSL_CLIENT_SUBJECT_VALIDATION' in os.environ
+DISABLE_SSL_CLIENT_SUBJECT_VALIDATION = \
+    'KAZOO_COMMISSION_DISABLE_SSL_CLIENT_SUBJECT_VALIDATION' in os.environ
 """ Whether or not the server will validate the MAC address of the requested
     device against the the X-SSL-Subject header passed from the web server.
     Highly recommended for security. """
@@ -30,7 +30,7 @@ SIP_OUTBOUND_PROXY = os.environ.get('KAZOO_COMMISSION_SIP_OUTBOUND_PROXY',
 SIP_DNS_SRV = 'SIP_DNS_A_RECORD' in os.environ
 """ Use DNS A Record Mode - Defaults to DNS SRV Record if left unset """
 
-FIRMWARE_SERVER_URL = os.environ.get('FIRMWARE_SERVER_URL',
+FIRMWARE_SERVER_URL = os.environ.get('KAZOO_COMMISSION_FIRMWARE_SERVER_URL',
                                      'http://localhost/firmware')
 """ URL of base directory firmware is served from (note: each template has
     its own subdirectory for firmware) """
