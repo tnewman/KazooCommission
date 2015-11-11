@@ -52,10 +52,9 @@ def get_provisioning_file(manufacturer, model, account, mac_address,
         phone_config = render_template(template_path, config=config,
                                        account=account, device=device_data,
                                        mac_address=mac_address)
+        response = make_response(phone_config)
+        response.headers['Content-Type'] = 'application/xml'
+
+        return response
     except TemplateNotFound:
         abort(404)
-
-    response = make_response(phone_config)
-    response.headers['Content-Type'] = 'application/xml'
-
-    return response
