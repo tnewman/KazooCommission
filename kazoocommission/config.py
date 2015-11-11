@@ -7,14 +7,7 @@
 """
 
 import os
-from enum import Enum
 
-
-class DNSMode(Enum):
-    a_record = 0
-    srv = 1
-    naptr_srv = 2
-    ip = 3
 
 # Settings for Kazoo Commission Server
 KAZOO_COUCH_DB_URL = os.environ.get('KAZOO_COUCH_DB_URL',
