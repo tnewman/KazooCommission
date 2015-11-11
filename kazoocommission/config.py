@@ -17,7 +17,8 @@ class DNSMode(Enum):
     ip = 3
 
 # Settings for Kazoo Commission Server
-KAZOO_COUCH_DB_URL = 'http://localhost:5984'
+KAZOO_COUCH_DB_URL = os.environ.get('KAZOO_COUCH_DB_URL',
+                                    'http://localhost:5984')
 """ URL to connect to CouchDB for 2600hz Kazoo """
 
 DEBUG = 'KAZOO_COMMISSION_DEBUG' in os.environ
