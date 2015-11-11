@@ -27,7 +27,7 @@ def authenticate(fn):
         if kwargs['device_data'] is None:
             abort(404)
 
-        if config.SSL_CLIENT_SUBJECT_VALIDATION:
+        if not config.DISABLE_SSL_CLIENT_SUBJECT_VALIDATION:
             ssl_subject = request.headers.get('X-SSL-Subject')
 
             if not ssl_subject:
@@ -52,10 +52,9 @@ def get_provisioning_file(manufacturer, model, account, mac_address,
         phone_config = render_template(template_path, config=config,
                                        account=account, device=device_data,
                                        mac_address=mac_address)
+        response = make_response(phone_config)
+        response.headers['Content-Type'] = 'application/xml'
+
+        return response
     except TemplateNotFound:
         abort(404)
-
-    response = make_response(phone_config)
-    response.headers['Content-Type'] = 'application/xml'
-
-    return response
