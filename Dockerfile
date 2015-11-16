@@ -1,6 +1,5 @@
 FROM python
 MAINTAINER Thomas Newman
-RUN apt-get update -y && apt-get clean -y
 RUN git clone https://github.com/tnewman/KazooCommission --depth 1
 WORKDIR KazooCommission
 RUN pip install -r requirements.txt && pip install gunicorn	
