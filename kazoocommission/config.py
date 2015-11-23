@@ -27,8 +27,8 @@ DISABLE_SSL_CLIENT_SUBJECT_VALIDATION = \
 SIP_OUTBOUND_PROXY = os.environ.get('KAZOO_COMMISSION_SIP_OUTBOUND_PROXY',
                                     'localhost')
 
-SIP_DNS_SRV = 'SIP_DNS_A_RECORD' in os.environ
-""" Use DNS A Record Mode - Defaults to DNS SRV Record if left unset """
+SIP_DNS_SRV = not 'SIP_DNS_A_RECORD' in os.environ
+""" Use DNS SRV Record Mode - Defaults to DNS SRV Record if left unset """
 
 FIRMWARE_SERVER_URL = os.environ.get('KAZOO_COMMISSION_FIRMWARE_SERVER_URL',
                                      'http://localhost/firmware')
